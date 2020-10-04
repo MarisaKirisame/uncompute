@@ -1,7 +1,5 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+// The implementation of UnComputing.
+// Please use this only; the other version only exists for pedagogical purpose.
+mod toy;
+mod essential;
+mod simple;
