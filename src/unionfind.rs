@@ -7,10 +7,10 @@
 use std::ops::Add;
 
 struct UnionFind<V> {
-    vec: Vec<UnionFindNode<V>>
+    vec: Vec<UnionFindNode<V>>,
 }
 
-impl<V:Copy + Add<Output=V>> UnionFind<V> {
+impl<V: Copy + Add<Output = V>> UnionFind<V> {
     pub fn merge(&mut self, mut l: UnionFindIdx, mut r: UnionFindIdx) {
         l = self.find(l);
         r = self.find(r);
@@ -20,14 +20,16 @@ impl<V:Copy + Add<Output=V>> UnionFind<V> {
         }
     }
     pub fn new(&mut self, v: V) -> UnionFindIdx {
-        let idx = UnionFindIdx { idx: self.vec.len() };
+        let idx = UnionFindIdx {
+            idx: self.vec.len(),
+        };
         self.vec.push(UnionFindNode { parent: idx, v });
         idx
     }
-    pub fn v(&self, idx:UnionFindIdx) -> V {
+    pub fn v(&self, idx: UnionFindIdx) -> V {
         self.get(idx).v
     }
-    pub fn set_v(&mut self, idx:UnionFindIdx, v:V) {
+    pub fn set_v(&mut self, idx: UnionFindIdx, v: V) {
         self.get_mut(idx).v = v;
     }
     fn get(&self, idx: UnionFindIdx) -> &UnionFindNode<V> {
@@ -55,13 +57,13 @@ impl<V:Copy + Add<Output=V>> UnionFind<V> {
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct UnionFindIdx {
-    idx: usize
+    idx: usize,
 }
 
 struct UnionFindNode<V> {
     // If the node is root, parent is itself.
     parent: UnionFindIdx,
-    v: V
+    v: V,
 }
 
 impl<V> UnionFindNode<V> {
@@ -70,5 +72,13 @@ impl<V> UnionFindNode<V> {
     }
     fn set(&mut self, v: V) {
         self.v = v
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 5);
     }
 }

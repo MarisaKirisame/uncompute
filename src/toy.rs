@@ -6,47 +6,55 @@
 // Basically, this is designed for Deep Learning:
 // The fundamental unit is atomic tensor.
 
-struct Closure<T> {
+use either::*;
+use std::rc::Rc;
+use std::time::{Duration, Instant};
+
+struct RematerializerNode<T> {
     inputs: Vec<Uncompute<T>>,
-    func: Box<dyn Fn(Vec<T>) -> T>
+    func: Box<dyn Fn(Vec<T>) -> T>,
+    compute: Duration,
 }
+
+type Rematerializer<T> = Rc<RematerializerNode<T>>;
 
 pub struct Uncompute<T> {
-    t: T,
-    clos: Option<Closure<T>>
+    value: Either<T, Rematerializer<T>>,
+    memory: usize,
+    last_accessed: Instant,
+    remats: Vec<Rematerializer<T>>,
 }
 
+/*
 impl<T> Uncompute<T> {
     pub fn wrap(t: T) -> Uncompute<T> {
-        Uncompute { t, clos: None }
+        Uncompute {
+            t: Some(t),
+            remat: None,
+            last_accessed: Instant::now(),
+            memory: 0
+        }
     }
     pub fn unwrap(self: Uncompute<T>) -> T {
-        self.t
+        self.t.unwrap() // todo: implement
     }
     pub fn compute(input: Vec<Uncompute<T>>, func: Box<dyn Fn(Vec<T>) -> T>) {
-        
+
     }
     pub fn evictable(self: Uncompute<T>) -> bool {
-        self.clos.is_none()
+        self.remat.is_none()
     }
     pub fn evict() {
-        
+
     }
     pub fn try_evict(uc: Uncompute<T>) {
         assert!(uc.evictable())
     }
     pub fn lock() {
-        
+
     }
     pub fn unlock() {
-        
-    }
-}
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
     }
 }
+*/
