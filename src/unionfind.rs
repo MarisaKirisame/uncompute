@@ -32,10 +32,12 @@ impl<V: Copy + Add<Output = V>> UnionFind<V> {
         self.vec.push(UnionFindNode { parent: idx, v });
         idx
     }
-    pub fn v(&self, idx: UnionFindIdx) -> V {
+    pub fn v(&mut self, mut idx: UnionFindIdx) -> V {
+        idx = self.find(idx);
         self.get(idx).v
     }
-    pub fn set_v(&mut self, idx: UnionFindIdx, v: V) {
+    pub fn set_v(&mut self, mut idx: UnionFindIdx, v: V) {
+        idx = self.find(idx);
         self.get_mut(idx).v = v;
     }
     fn get(&self, idx: UnionFindIdx) -> &UnionFindNode<V> {
@@ -72,21 +74,12 @@ struct UnionFindNode<V> {
     v: V,
 }
 
-impl<V> UnionFindNode<V> {
-    fn get(&self) -> &V {
-        &self.v
-    }
-    fn set(&mut self, v: V) {
-        self.v = v
-    }
-}
-
 #[derive(Debug, Copy, Clone, PartialEq)]
 struct NoSummary;
 
 impl Add for NoSummary {
     type Output = NoSummary;
-    fn add(self: NoSummary, other: NoSummary) -> NoSummary {
+    fn add(self: NoSummary, _other: NoSummary) -> NoSummary {
         NoSummary
     }
 }
@@ -95,7 +88,7 @@ impl Add for NoSummary {
 mod tests {
     use crate::unionfind::*;
     #[test]
-    fn test() {
+    fn test_basic() {
         let mut uf = UnionFind::<NoSummary>::new();
         let x = uf.new_class(NoSummary);
         assert!(uf.idx_eq(x, x));
@@ -103,5 +96,24 @@ mod tests {
         assert!(!uf.idx_eq(x, y));
         uf.merge(x, y);
         assert!(uf.idx_eq(x, y));
+    }
+    #[test]
+    fn test_v() {
+        let mut uf = UnionFind::<usize>::new();
+        let x = uf.new_class(1);
+        assert!(uf.v(x) == 1);
+        uf.merge(x, x);
+        assert!(uf.v(x) == 1);
+        let y = uf.new_class(2);
+        assert!(uf.v(y) == 2);
+        uf.merge(y, x);
+        assert!(uf.v(x) == 3);
+        assert!(uf.v(y) == 3);
+        uf.set_v(x, 4);
+        assert!(uf.v(x) == 4);
+        assert!(uf.v(y) == 4);
+        uf.set_v(y, 5);
+        assert!(uf.v(x) == 5);
+        assert!(uf.v(y) == 5);
     }
 }
