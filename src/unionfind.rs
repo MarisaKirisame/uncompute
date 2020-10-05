@@ -100,7 +100,7 @@ mod tests {
         let x = uf.new_class(NoSummary);
         assert!(uf.idx_eq(x, x));
         let y = uf.new_class(NoSummary);
-        assert!(! uf.idx_eq(x, y));
+        assert!(!uf.idx_eq(x, y));
         uf.merge(x, y);
         assert!(uf.idx_eq(x, y));
     }
