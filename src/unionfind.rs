@@ -6,7 +6,7 @@
 // The design and implementation is inspired by egg and ena.
 use std::ops::Add;
 
-struct UnionFind<V> {
+pub struct UnionFind<V> {
     vec: Vec<UnionFindNode<V>>,
 }
 
@@ -14,12 +14,18 @@ impl<V: Copy + Add<Output = V>> UnionFind<V> {
     pub fn merge(&mut self, mut l: UnionFindIdx, mut r: UnionFindIdx) {
         l = self.find(l);
         r = self.find(r);
-        if l.idx != r.idx {
+        if l != r {
             self.set_parent(l, r);
             self.get_mut(r).v = self.get(l).v + self.get(r).v;
         }
     }
-    pub fn new(&mut self, v: V) -> UnionFindIdx {
+    pub fn idx_eq(&mut self, l: UnionFindIdx, r: UnionFindIdx) -> bool {
+        self.find(l) == self.find(r)
+    }
+    pub fn new() -> UnionFind<V> {
+        UnionFind { vec: Vec::new() }
+    }
+    pub fn new_class(&mut self, v: V) -> UnionFindIdx {
         let idx = UnionFindIdx {
             idx: self.vec.len(),
         };
@@ -42,7 +48,7 @@ impl<V: Copy + Add<Output = V>> UnionFind<V> {
         self.get(idx).parent
     }
     fn set_parent(&mut self, idx: UnionFindIdx, parent: UnionFindIdx) {
-        self.get_mut(idx).parent = idx
+        self.get_mut(idx).parent = parent
     }
     fn find(&mut self, mut idx: UnionFindIdx) -> UnionFindIdx {
         let parent = self.parent(idx);
@@ -75,10 +81,27 @@ impl<V> UnionFindNode<V> {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+struct NoSummary;
+
+impl Add for NoSummary {
+    type Output = NoSummary;
+    fn add(self: NoSummary, other: NoSummary) -> NoSummary {
+        NoSummary
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::unionfind::*;
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 5);
+    fn test() {
+        let mut uf = UnionFind::<NoSummary>::new();
+        let x = uf.new_class(NoSummary);
+        assert!(uf.idx_eq(x, x));
+        let y = uf.new_class(NoSummary);
+        assert!(! uf.idx_eq(x, y));
+        uf.merge(x, y);
+        assert!(uf.idx_eq(x, y));
     }
 }
