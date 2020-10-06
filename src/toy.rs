@@ -9,34 +9,42 @@
 use either::*;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
+/*
 
 struct RematerializerNode<T> {
-    inputs: Vec<Uncompute<T>>,
+    inputs: Vec<mut Uncompute<T>>,
     func: Box<dyn Fn(Vec<T>) -> T>,
     compute: Duration,
 }
 
 type Rematerializer<T> = Rc<RematerializerNode<T>>;
 
-pub struct Uncompute<T> {
+pub struct UncomputeNode<T> {
     value: Either<T, Rematerializer<T>>,
     memory: usize,
     last_accessed: Instant,
     remats: Vec<Rematerializer<T>>,
 }
 
-/*
+pub struct Uncompute<T>(Rc<Cell<Uncompute<T>>>);
+
 impl<T> Uncompute<T> {
     pub fn wrap(t: T) -> Uncompute<T> {
         Uncompute {
-            t: Some(t),
-            remat: None,
+            value: Left(t),
+            remats: Vec::new(),
             last_accessed: Instant::now(),
-            memory: 0
+            memory: 0,
         }
     }
-    pub fn unwrap(self: Uncompute<T>) -> T {
-        self.t.unwrap() // todo: implement
+    pub fn unwrap(&mut self) -> T where T:Clone {
+        match &self.value {
+            Left(t) => t.clone(),
+            Right(r) => {
+                self.value = Right(r.clone());
+                panic!("unimplemented")
+            }
+        }
     }
     pub fn compute(input: Vec<Uncompute<T>>, func: Box<dyn Fn(Vec<T>) -> T>) {
 
@@ -57,4 +65,4 @@ impl<T> Uncompute<T> {
 
     }
 }
-*/
+ */

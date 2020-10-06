@@ -26,9 +26,7 @@ impl<V: Copy + Add<Output = V>> UnionFind<V> {
         UnionFind { vec: Vec::new() }
     }
     pub fn new_class(&mut self, v: V) -> UnionFindIdx {
-        let idx = UnionFindIdx {
-            idx: self.vec.len(),
-        };
+        let idx = UnionFindIdx(self.vec.len());
         self.vec.push(UnionFindNode { parent: idx, v });
         idx
     }
@@ -41,10 +39,10 @@ impl<V: Copy + Add<Output = V>> UnionFind<V> {
         self.get_mut(idx).v = v;
     }
     fn get(&self, idx: UnionFindIdx) -> &UnionFindNode<V> {
-        &self.vec[idx.idx]
+        &self.vec[idx.0]
     }
     fn get_mut(&mut self, idx: UnionFindIdx) -> &mut UnionFindNode<V> {
-        &mut self.vec[idx.idx]
+        &mut self.vec[idx.0]
     }
     fn parent(&self, idx: UnionFindIdx) -> UnionFindIdx {
         self.get(idx).parent
@@ -64,9 +62,7 @@ impl<V: Copy + Add<Output = V>> UnionFind<V> {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct UnionFindIdx {
-    idx: usize,
-}
+pub struct UnionFindIdx(usize);
 
 struct UnionFindNode<V> {
     // If the node is root, parent is itself.
