@@ -7,6 +7,7 @@
 // The fundamental unit is atomic tensor.
 
 use either::*;
+use std::cell::Cell;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
@@ -18,25 +19,26 @@ struct RematerializerNode<T> {
 
 type Rematerializer<T> = Rc<RematerializerNode<T>>;
 
-pub struct UncomputeNode<T> {
+struct UncomputeNode<T> {
     value: Either<T, Rematerializer<T>>,
     memory: usize,
     last_accessed: Instant,
     remats: Vec<Rematerializer<T>>,
 }
 
-pub struct Uncompute<T>(Rc<Cell<Uncompute<T>>>);
-/*
+pub struct Uncompute<T>(Rc<Cell<UncomputeNode<T>>>);
 
 impl<T> Uncompute<T> {
     pub fn wrap(t: T) -> Uncompute<T> {
-        Uncompute {
+        Uncompute(Rc::new(Cell::new(UncomputeNode {
             value: Left(t),
             remats: Vec::new(),
             last_accessed: Instant::now(),
             memory: 0,
-        }
+        })))
     }
+
+    /*
     pub fn unwrap(&mut self) -> T where T:Clone {
         match &self.value {
             Left(t) => t.clone(),
@@ -64,5 +66,5 @@ impl<T> Uncompute<T> {
     pub fn unlock() {
 
     }
+     */
 }
- */
