@@ -9,10 +9,9 @@
 use either::*;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
-/*
 
 struct RematerializerNode<T> {
-    inputs: Vec<mut Uncompute<T>>,
+    inputs: Vec<Uncompute<T>>,
     func: Box<dyn Fn(Vec<T>) -> T>,
     compute: Duration,
 }
@@ -27,6 +26,7 @@ pub struct UncomputeNode<T> {
 }
 
 pub struct Uncompute<T>(Rc<Cell<Uncompute<T>>>);
+/*
 
 impl<T> Uncompute<T> {
     pub fn wrap(t: T) -> Uncompute<T> {
