@@ -17,6 +17,16 @@ struct RematerializerNode<T> {
     compute: Duration,
 }
 
+impl<T:Clone> RematerializerNode<T> {
+    fn remat(self) -> T {
+        let mut inputs = Vec::new();
+        for x in self.inputs {
+            inputs.push(x.unwrap());
+        }
+        (self.func)(inputs)
+    }
+}
+
 type Rematerializer<T> = Rc<RematerializerNode<T>>;
 
 struct UncomputeNode<T> {
@@ -28,7 +38,7 @@ struct UncomputeNode<T> {
 
 pub struct Uncompute<T>(Rc<Cell<UncomputeNode<T>>>);
 
-impl<T> Uncompute<T> {
+impl<T:Clone> Uncompute<T> {
     pub fn wrap(t: T) -> Uncompute<T> {
         Uncompute(Rc::new(Cell::new(UncomputeNode {
             value: Left(t),
@@ -38,16 +48,11 @@ impl<T> Uncompute<T> {
         })))
     }
 
-    /*
-    pub fn unwrap(&mut self) -> T where T:Clone {
-        match &self.value {
-            Left(t) => t.clone(),
-            Right(r) => {
-                self.value = Right(r.clone());
-                panic!("unimplemented")
-            }
-        }
+    pub fn unwrap(&self) -> T {
+        panic!("unimplemented")
     }
+
+    /*
     pub fn compute(input: Vec<Uncompute<T>>, func: Box<dyn Fn(Vec<T>) -> T>) {
 
     }
@@ -59,12 +64,6 @@ impl<T> Uncompute<T> {
     }
     pub fn try_evict(uc: Uncompute<T>) {
         assert!(uc.evictable())
-    }
-    pub fn lock() {
-
-    }
-    pub fn unlock() {
-
     }
      */
 }
