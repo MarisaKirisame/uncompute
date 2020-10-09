@@ -45,7 +45,8 @@ impl<T:Clone> Uncompute<T> {
     }
 
     pub fn unwrap(&self) -> T {
-        let x = self;
+        let x = self.get();
+        x + 0;
         panic!("unimplemented")
     }
 
