@@ -7,7 +7,7 @@
 // The fundamental unit is atomic tensor.
 
 use either::*;
-use std::cell::Cell;
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
@@ -15,16 +15,6 @@ struct RematerializerNode<T> {
     inputs: Vec<Uncompute<T>>,
     func: Box<dyn Fn(Vec<T>) -> T>,
     compute: Duration,
-}
-
-impl<T:Clone> RematerializerNode<T> {
-    fn remat(self) -> T {
-        let mut inputs = Vec::new();
-        for x in self.inputs {
-            inputs.push(x.unwrap());
-        }
-        (self.func)(inputs)
-    }
 }
 
 type Rematerializer<T> = Rc<RematerializerNode<T>>;
@@ -36,11 +26,17 @@ struct UncomputeNode<T> {
     remats: Vec<Rematerializer<T>>,
 }
 
-pub struct Uncompute<T>(Rc<Cell<UncomputeNode<T>>>);
+struct Timed<T> {
+    value: T,
+    before: Instant,
+    after: Instant
+}
+
+pub struct Uncompute<T>(Rc<RefCell<UncomputeNode<T>>>);
 
 impl<T:Clone> Uncompute<T> {
     pub fn wrap(t: T) -> Uncompute<T> {
-        Uncompute(Rc::new(Cell::new(UncomputeNode {
+        Uncompute(Rc::new(RefCell::new(UncomputeNode {
             value: Left(t),
             remats: Vec::new(),
             last_accessed: Instant::now(),
@@ -49,21 +45,44 @@ impl<T:Clone> Uncompute<T> {
     }
 
     pub fn unwrap(&self) -> T {
+        let x = self;
         panic!("unimplemented")
     }
 
-    /*
-    pub fn compute(input: Vec<Uncompute<T>>, func: Box<dyn Fn(Vec<T>) -> T>) {
+    pub fn compute(inputs: Vec<Uncompute<T>>, func: Box<dyn Fn(Vec<T>) -> T>) -> Uncompute<T> {
+        let t = Self::remat(&inputs, &func);
+        let remat = Rc::new(RematerializerNode { inputs, func, compute: t.after - t.before});
+        Uncompute(Rc::new(RefCell::new(UncomputeNode {
+            value: Left(t.value),
+            remats: vec!(remat),
+            last_accessed: t.after,
+            memory: 0
+        })))
+    }
 
+    fn remat(inputs: &Vec<Uncompute<T>>, func: &Box<dyn Fn(Vec<T>) -> T>) -> Timed<T> {
+        let mut raw_inputs = Vec::new();
+        for x in inputs {
+            raw_inputs.push(x.unwrap());
+        }
+        let before = Instant::now();
+        let value = (func)(raw_inputs);
+        let after = Instant::now();
+        Timed { value, before, after }
     }
-    pub fn evictable(self: Uncompute<T>) -> bool {
-        self.remat.is_none()
-    }
-    pub fn evict() {
 
+    pub fn evictable(&self) -> bool {
+        (*(*self.0).borrow()).value.is_left()
     }
-    pub fn try_evict(uc: Uncompute<T>) {
-        assert!(uc.evictable())
+
+    pub fn evict(&self) {
+        assert!(self.evictable());
+        panic!("unimplemented")
     }
-     */
+
+    pub fn try_evict(&self) {
+        if self.evictable() {
+            self.evict()
+        }
+    }
 }
